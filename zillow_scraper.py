@@ -75,6 +75,7 @@ class ZillowScraper():
     #grab all the json
     result = content.find("script", id="__NEXT_DATA__")
     data = json.loads(result.string)
+    #gen_dict_extract is a function that finds all occurences of a key in a nested dictionary.
     for result in self.gen_dict_extract("homeInfo", data):
       #TO DO - if we navigate between pages too fast we risk getting blocked so sleep for a
       #random time for each iteration of the loop.(somewhere between 4-8 seconds?)
