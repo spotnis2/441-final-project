@@ -2,6 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import pprint
+import csv
+import random
+import time
 # url = 'https://www.zillow.com/il/sold/?category=RECENT_SEARCH&searchQueryState=%7B%22pagination%22%3A%7B%7D%2C%22isMapVisible%22%3Afalse%2C%22mapBounds%22%3A%7B%22west%22%3A-91.513079%2C%22east%22%3A-87.019935%2C%22south%22%3A36.970298%2C%22north%22%3A42.508338%7D%2C%22usersSearchTerm%22%3A%22IL%22%2C%22regionSelection%22%3A%5B%7B%22regionId%22%3A21%2C%22regionType%22%3A2%7D%5D%2C%22filterState%22%3A%7B%22sort%22%3A%7B%22value%22%3A%22globalrelevanceex%22%7D%2C%22rs%22%3A%7B%22value%22%3Atrue%7D%2C%22fsba%22%3A%7B%22value%22%3Afalse%7D%2C%22fsbo%22%3A%7B%22value%22%3Afalse%7D%2C%22nc%22%3A%7B%22value%22%3Afalse%7D%2C%22cmsn%22%3A%7B%22value%22%3Afalse%7D%2C%22auc%22%3A%7B%22value%22%3Afalse%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D%7D%2C%22isListVisible%22%3Atrue%7D'
 
 # headers={
@@ -51,6 +54,7 @@ class ZillowScraper():
   }
 
   homes_list = []
+  column_names = []
 
   def fetch(self, url, params=None):
     response = requests.get(url, headers=self.headers, params=params)
@@ -75,11 +79,12 @@ class ZillowScraper():
     #grab all the json
     result = content.find("script", id="__NEXT_DATA__")
     data = json.loads(result.string)
-    #gen_dict_extract is a function that finds all occurences of a key in a nested dictionary.
+    #gen_dict_extract is a function that finds all occurences of a key in a nested dictionary.r
     for result in self.gen_dict_extract("homeInfo", data):
       #TO DO - if we navigate between pages too fast we risk getting blocked so sleep for a
       #random time for each iteration of the loop.(somewhere between 4-8 seconds?)
-
+      sleep_time = random.uniform(5,10)
+      time.sleep(sleep_time)
       #construct url string
       url_individual_home = f'https://www.zillow.com/homedetails/{result["streetAddress"].replace(" ", "-")}-{result["city"].replace(" ", "-")}-{result["state"]}-{result["zipcode"]}/{result["zpid"]}_zpid/"'
       resp = self.fetch(url_individual_home)
@@ -96,17 +101,31 @@ class ZillowScraper():
       result["has_heating"] = has_heating
       result["has_cooling"] = has_cooling
       result["year_built"] = year_built
+      print("RESULTTTTTTTT")
       print(result)
 
-
+      print("LISTING DATATAAA")
       pprint.pprint(listing_data["property"]["priceHistory"])
       #TO DO - parse listing_data["property"]["priceHistory"] for list price, sell price, list date, and sell date, and add these to result.
+      # need to check event = sale and event = listed for sale and dates associated witht those events
+      # list_price = listing_data["property"]["priceHistory"].get("")
+      # sell_price = listing_data["property"]["priceHistory"].get("")
+      # list_date = listing_data["property"]["priceHistory"].get("")
+      # sell_date = listing_data["property"]["priceHistory"].get("")
+      # result["list_price"] = list_price
+      # result["sell_price"] = sell_price
+      # result["list_date"] = list_date
+      # result["sell_date"] = sell_date
 
       self.homes_list.append(result)
       break #TO DO - remove this break after we are sure one example is working. Also after the random sleeping is implemented
 
-  def convert_to_csv(self):
+  def convert_to_csv(self, column_names, homes_list):
      #TO DO: convert the homes_list to df to csv.
+     with open('zillow_homes.csv', 'w', newline='') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(column_names)
+        csv_writer.writerows(homes_list)
      pass
   
   def run(self):
