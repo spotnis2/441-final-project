@@ -7,7 +7,7 @@ import random
 import time
 from datetime import datetime 
 import pandas as pd
-
+import traceback
 class ZillowScraper():
   #https://github.com/johnbalvin/pyzill/blob/main/src/pyzill/search.py
   headers = {
@@ -72,6 +72,10 @@ class ZillowScraper():
     'sold_date',
     'time_on_market'
 ]
+  
+  total_results_for_county = 0
+  current_results_for_county = 0
+   
 
   def fetch(self, url, params=None):
     response = requests.get(url, headers=self.headers, params=params)
@@ -91,18 +95,28 @@ class ZillowScraper():
                     for result in self.gen_dict_extract(key, d):
                         yield result
   
-  def parse(self, response):
+  def parse(self, response, i):
     content = BeautifulSoup(response)
     #grab all the json
     result = content.find("script", id="__NEXT_DATA__")
     data = json.loads(result.string)
+    
+    if i == 1:
+      try:
+        gen = self.gen_dict_extract("totalResultCount", data)
+        self.total_results_for_county = next(gen)
+        print(self.total_results_for_county)
+      except Exception as e:
+        print("Problem getting total count", e)
     #gen_dict_extract is a function that finds all occurences of a key in a nested dictionary.r
     for result in self.gen_dict_extract("homeInfo", data):
+      self.current_results_for_county += 1
       try:
         sleep_time = random.uniform(5,10)
         time.sleep(sleep_time)
         #construct url string
         url_individual_home = f'https://www.zillow.com/homedetails/{result["streetAddress"].replace(" ", "-")}-{result["city"].replace(" ", "-")}-{result["state"]}-{result["zipcode"]}/{result["zpid"]}_zpid/"'
+        print(url_individual_home)
         resp = self.fetch(url_individual_home)
         content = BeautifulSoup(resp.text)
         result_indiv = content.find("script", id="__NEXT_DATA__")
@@ -142,9 +156,10 @@ class ZillowScraper():
         result["time_on_market"] = time_on_market
 
         self.homes_list.append(result)
-        print(self.homes_list)
+        print(result)
       except Exception as e:
         print("An error occurred:", e)
+        traceback.print_exc()
 
   def convert_to_csv(self):
      with open('zillow_homes.csv', 'w', newline='') as file:
@@ -156,27 +171,23 @@ class ZillowScraper():
     ])
   
   def run(self):
-
-    min_lon = -91.513 #west
-
-    max_lon = -87.5 #east
-
-    min_lat = 36.970 #south
-
-    max_lat = 42.508 #north
-
-    step_lon = 0.8026
-    step_lat = 0.2769
-    for a in range(5):
-      for b in range(20):
+    with open("illinois_places_bounding_boxes.csv", "r") as file:
+      for line in file:
+        columns = line.strip().split(",")
+        if columns[0] == "NAME": #first line
+          continue
+        print("COLUMNS", columns)
+        self.current_results_for_county = 0
+            
         for i in range(1, 21):
           try:
-            url = f'https://www.zillow.com/il/sold/{i}_p/?searchQueryState=%7B%22isMapVisible%22%3Atrue%2C%22mapBounds%22%3A%7B%22west%22%3A{min_lon}%2C%22east%22%3A{min_lon+step_lon}%2C%22south%22%3A{min_lat}%2C%22north%22%3A{min_lat + step_lat}%7D%2C%22mapZoom%22%3A6%2C%22usersSearchTerm%22%3A%22IL%22%2C%22regionSelection%22%3A%5B%7B%22regionId%22%3A21%2C%22regionType%22%3A2%7D%5D%2C%22filterState%22%3A%7B%22sort%22%3A%7B%22value%22%3A%22globalrelevanceex%22%7D%2C%22fsba%22%3A%7B%22value%22%3Afalse%7D%2C%22fsbo%22%3A%7B%22value%22%3Afalse%7D%2C%22nc%22%3A%7B%22value%22%3Afalse%7D%2C%22cmsn%22%3A%7B%22value%22%3Afalse%7D%2C%22auc%22%3A%7B%22value%22%3Afalse%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D%2C%22rs%22%3A%7B%22value%22%3Atrue%7D%2C%22land%22%3A%7B%22value%22%3Afalse%7D%2C%22manu%22%3A%7B%22value%22%3Afalse%7D%2C%22doz%22%3A%7B%22value%22%3A%2290%22%7D%7D%2C%22isListVisible%22%3Atrue%2C%22pagination%22%3A%7B%22currentPage%22%3A{i}%7D%7D'
+            url = f'https://www.zillow.com/{columns[0].lower()}-il/sold/{i}_p/?category=RECENT_SEARCH&searchQueryState=%7B%22pagination%22%3A%7B%7D%2C%22currentPage%3A{i}%7D%2CisMapVisible%22%3Atrue%2C%22mapBounds%22%3A%7B%22west%22%3A{columns[2]}%2C%22east%22%3A{columns[4]}%2C%22south%22%3A{columns[3]}%2C%22north%22%3A{columns[5]}%7D%2C%22usersSearchTerm%22%3A%22{columns[0]}%20IL%22%2C%22filterState%22%3A%7B%22sort%22%3A%7B%22value%22%3A%22days%22%7D%2C%22fsba%22%3A%7B%22value%22%3Afalse%7D%2C%22fsbo%22%3A%7B%22value%22%3Afalse%7D%2C%22nc%22%3A%7B%22value%22%3Afalse%7D%2C%22cmsn%22%3A%7B%22value%22%3Afalse%7D%2C%22auc%22%3A%7B%22value%22%3Afalse%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D%2C%22rs%22%3A%7B%22value%22%3Atrue%7D%2C%22land%22%3A%7B%22value%22%3Afalse%7D%2C%22manu%22%3A%7B%22value%22%3Afalse%7D%2C%22doz%22%3A%7B%22value%22%3A%2290%22%7D%7D%2C%22isListVisible%22%3Atrue%7D'
+            print(url)
             params = {
               'searchQueryState': f'{{'
                 f'"pagination":{{"currentPage":{i}}},'
                 f'"isMapVisible":false,'
-                f'"mapBounds":{{"west":{min_lon},"east":{min_lon+step_lon},"south":{min_lat},"north":{min_lat+step_lat}}},'
+                f'"mapBounds":{{"west":{columns[2]},"east":{columns[4]},"south":{columns[3]},"north":{columns[5]}}},'
                 f'"mapZoom":6,'
                 f'"usersSearchTerm":"IL",'
                 f'"regionSelection":[{{"regionId":21,"regionType":2}}],'
@@ -195,14 +206,17 @@ class ZillowScraper():
                 f'}},'
                 f'"isListVisible":true'
                 f'}}'
-            }
+              }
 
             res = self.fetch(url, params)
-            self.parse(res.text)
-          except:
-             print("Error encountered fetching entire page.")
-        min_lat += step_lat
-      min_lon += step_lon
+            self.parse(res.text, i)
+          except Exception as e:
+              print("Error encountered fetching entire page.", e)
+              traceback.print_exc()
+          if self.current_results_for_county >= self.total_results_for_county:
+               break
+
+
       
 
 if __name__ == '__main__':
