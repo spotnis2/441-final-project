@@ -1,4 +1,4 @@
-import requests
+from curl_cffi import requests
 from bs4 import BeautifulSoup
 import json
 import pprint
@@ -160,9 +160,11 @@ class ZillowScraper():
       except Exception as e:
         print("An error occurred:", e)
         traceback.print_exc()
+    self.convert_to_csv()
+    self.homes_list = []
 
   def convert_to_csv(self):
-     with open('zillow_homes.csv', 'w', newline='') as file:
+     with open('zillow_homes.csv', 'a', newline='') as file:
         csv_writer = csv.writer(file)
         csv_writer.writerow(self.column_names)
         csv_writer.writerows([
