@@ -2,16 +2,13 @@ import os
 from curl_cffi import requests
 from bs4 import BeautifulSoup
 import json
-import pprint
 import csv
 import random
 import time
 from datetime import datetime 
-import pandas as pd
 import traceback
 
 class ZillowScraper():
-  #https://github.com/johnbalvin/pyzill/blob/main/src/pyzill/search.py
   user_agent_options = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
@@ -38,6 +35,7 @@ class ZillowScraper():
   }
 
   homes_list = []
+
   column_names = [
     'zpid',
     'streetAddress',
