@@ -1,19 +1,17 @@
 import requests
 import pandas as pd
 import os
-import csv
 
-#sonika's api key - 6dd6261388c448bdb6917c07705db29e
-#kinjal's api key - 114e4969fc744714a9d676259631ff04
-#peter's api key - 8229c7243a97433285bc8d44b037fad7
-#sonika api key 2 - 113586579daf40debf95e1e114ba331d
-
-
+#Sonika's api key - 6dd6261388c448bdb6917c07705db29e
+#Kinjal's api key - 114e4969fc744714a9d676259631ff04
+#Peter's api key - 8229c7243a97433285bc8d44b037fad7
+#Sonika api key 2 - 113586579daf40debf95e1e114ba331d
 api_keys = ['6dd6261388c448bdb6917c07705db29e', 
             '114e4969fc744714a9d676259631ff04', 
             '8229c7243a97433285bc8d44b037fad7',
             '113586579daf40debf95e1e114ba331d'
             ]
+
 current_api_key_ind = 0
 current_requests_per_key = 0
 
@@ -96,6 +94,14 @@ column_names_inactive_listings = [
 ]
 
 def make_csv(df, file_name):
+    '''
+    Creates a csv file if it does not already exist or appends to it (without headers) if it does exist.
+
+    Args: df(DataFrame): data frame to use when creating/appending to csv, 
+          file_name(string): csv file name 
+
+    Returns: N/A
+    '''
     file_created = os.path.isfile(file_name)
     
     if not file_created:
@@ -108,7 +114,15 @@ def make_csv(df, file_name):
                   index=False)
 
 # def get_properties_data():
-#     # Calls properties API
+#     '''
+#     Send API calls to the property records endpoint in RentCast to gather property records data for Illinois.
+
+#     Args: N/A  
+
+#     Returns: N/A
+#     '''
+        
+#     # calls listings API with a limit of 500 listings per request
 #     properties_limit = 500
 #     properties_offset = 0 
     
@@ -134,7 +148,8 @@ def make_csv(df, file_name):
         
 #         current_requests_per_key += 1
 
-#         response_as_json = response.json() #list of dicts
+#         # list of dicts
+#         response_as_json = response.json() 
 
 #         if response_as_json == []:
 #             break
@@ -160,7 +175,7 @@ def make_csv(df, file_name):
 #             if most_recent_tax_assessment_year == most_recent_property_taxes_year:
 #                 property_tax_ratio = int(property_taxes_total) / int(tax_assessment_value)
             
-#             #add key to dictionary
+#             # add key to dictionary
 #             item["property_tax_ratio"] = property_tax_ratio
             
 #             # count of historical sales
@@ -181,7 +196,14 @@ def make_csv(df, file_name):
 #         properties_offset += properties_limit
 
 def get_listings_data():
-    # Calls listings API
+    '''
+    Send API calls to the sales listings endpoint in RentCast to gather inactive listings data for Illinois.
+
+    Args: N/A  
+
+    Returns: N/A
+    '''
+    # calls listings API with a limit of 500 listings per request
     listings_limit = 500
     listings_offset = 0 
     
@@ -204,7 +226,8 @@ def get_listings_data():
 
         current_requests_per_key += 1
 
-        response_as_json = response.json()
+        # list of dicts
+        response_as_json = response.json() 
 
         if response_as_json == []:
             break
@@ -223,7 +246,13 @@ def get_listings_data():
         listings_offset += listings_limit
 
 if __name__ == '__main__':
+    '''
+    Main calls functions to get data, make csv files, and merge data to make a final csv (if needed).
 
+    Args: N/A  
+
+    Returns: N/A
+    '''
     # get_properties_data()
     get_listings_data()
     
