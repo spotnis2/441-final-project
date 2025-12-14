@@ -91,7 +91,12 @@ class ZillowScraper():
     print(response)
     return response
   
+
   def gen_dict_extract(self, key, var):
+    '''
+    Function from:
+    https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
+    '''
     if hasattr(var,'items'): 
         for k, v in var.items(): 
             if k == key:
