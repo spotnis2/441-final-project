@@ -5,7 +5,7 @@ The environment required to run this code is an IDE that supports Python. VSCode
 ## Data
 We access the ["sales listings endpoint on RentCast."](https://developers.rentcast.io/reference/sale-listings) through our code. "inactive_listings.csv" is created from running the code and it stores the retrieved data as a csv file.
 ## API Keys
-Currently, the code uses API keys associated with our group members. However, these keys are limited to 50 requests per month. Preferably, you should run the code using an API key associated with you. An API Key ["can be created here."] (https://app.rentcast.io/app/api) by creating an account, API Key, and finally activating the key. Note, it is likely that you will need more than the free 50 requests per key to obtain the same amount of data as us (about 50K rows). 
+The code requires you to add your API key into the list of API keys. An API Key ["can be created here."] (https://app.rentcast.io/app/api) by creating an account, API Key, and finally activating the key. Note, it is likely that you will need more than the free 50 requests per key to obtain the same amount of data as us (about 50K rows). 
 ## Environment
 The environment required to run this code is Google Workspace, specifically Google Drive and Google Colab. The necessary files to run the code (such as data files) should be stored in Google Drive and the code will be ran via Google Colab. Google Colab was choosen as the coding environment due to its GPU offerings, which our group did not have on our local machines. It is preferable to use Google Colab Pro so the GPU is consistently available while running the code and the large amount of data can be processed at a reasonable speed.
 ## Required Packages
