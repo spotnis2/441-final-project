@@ -2,14 +2,7 @@ import requests
 import pandas as pd
 import os
 
-#Sonika's api key - 6dd6261388c448bdb6917c07705db29e
-#Kinjal's api key - 114e4969fc744714a9d676259631ff04
-#Peter's api key - 8229c7243a97433285bc8d44b037fad7
-#Sonika api key 2 - 113586579daf40debf95e1e114ba331d
-api_keys = ['6dd6261388c448bdb6917c07705db29e', 
-            '114e4969fc744714a9d676259631ff04', 
-            '8229c7243a97433285bc8d44b037fad7',
-            '113586579daf40debf95e1e114ba331d'
+api_keys = ['!!PUT YOUR API KEYS HERE!!'
             ]
 
 current_api_key_ind = 0
